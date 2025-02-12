@@ -11,6 +11,8 @@ struct Home: View {
     // MARK: - Properties
     @State private var notes = [Note]()
     
+    @State var sheetIsPresented: Bool = false
+    
     
     // MARK: - Body
     var body: some View {
@@ -19,13 +21,18 @@ struct Home: View {
                 Text(note.note)
                     .padding()
             }// List
+            .sheet(isPresented: $sheetIsPresented, content: {
+                AddNoteView()
+            })
             .onAppear(perform: {
                 fetchNotes()
             })
             .navigationTitle("Notes")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    ToolbarButtons.addNote(action: {})
+                    ToolbarButtons.addNote(action: {
+                        self.sheetIsPresented.toggle()
+                    })
                 }// addNote
             }// toolbar
         }// NavigationStack
