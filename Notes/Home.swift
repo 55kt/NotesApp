@@ -11,6 +11,12 @@ struct Home: View {
     // MARK: - Properties
     @StateObject private var viewModel = NoteViewModel()
     @State var sheetIsPresented: Bool = false
+    @State var showAlert: Bool = false
+    
+    
+    var alert: Alert {
+        Alert(title: Text("Delete"), message: Text("Are you sure you want to delete this note?"), primaryButton: .destructive(Text("Delete"), action: viewModel.deleteNote), secondaryButton: .cancel())
+    }
     
     
     // MARK: - Body
@@ -19,7 +25,14 @@ struct Home: View {
             List(viewModel.notes) { note in
                 Text(note.note)
                     .padding()
+                    .onLongPressGesture {
+                        self.showAlert.toggle()
+                        viewModel.deleteItem = note
+                    }
             }// List
+            .alert(isPresented: $showAlert, content: {
+                alert
+            })
             .sheet(isPresented: $sheetIsPresented, onDismiss: viewModel.fetchNotes, content: {
                 AddNoteView()
             })

@@ -11,6 +11,7 @@ class NoteViewModel: ObservableObject {
     // MARK: - Properties
     @Published var text: String = ""
     @Published var notes: [Note] = []
+    @Published var deleteItem: Note?
 
     // MARK: - Methods
 
@@ -33,7 +34,35 @@ class NoteViewModel: ObservableObject {
             }
         }
         task.resume()
-    }
+    }// fetchNotes
+    
+    /// Delete a note
+    func deleteNote() {
+        guard let id = deleteItem?._id else { return }
+        
+        let url = URL(string: "http://localhost:3000/notes/\(id)")!
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "Delete"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, res, err in
+            guard err == nil else { return }
+            guard let data = data else { return }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] {
+                    print("Response from server: \(json)")
+                }
+            }
+            catch let error {
+                print("Error response deleting note: \(error)")
+            }
+        }
+        task.resume()
+        
+        fetchNotes()
+    }// deleteNote
 
     /// Sending a new note to the server
     func postNote() {
@@ -78,6 +107,6 @@ class NoteViewModel: ObservableObject {
         }
         
         task.resume()
-    }
+    }// postNote
 }
 
