@@ -14,11 +14,33 @@ struct ToolbarButtons {
     static func addNote(action: @escaping () -> Void) -> some View {
         Button {
             action()
-            print("Add a note")
         } label: {
-            Image(systemName: "plus")
-                .imageScale(.large)
-                .foregroundStyle(.primary)
+            HStack {
+                Text("Add")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                
+                Image(systemName: "plus")
+                    .imageScale(.large)
+                    .foregroundStyle(.primary)
+            }
+        }
+    }
+    
+    // Update note button
+    static func updateNote(isEditMode: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+        } label: {
+            HStack {
+                Image(systemName: isEditMode ? "checkmark" : "square.and.pencil")
+                    .imageScale(.large)
+                    .foregroundStyle(.primary)
+                
+                Text(isEditMode ? "Done" : "Edit")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+            }
         }
     }
     

@@ -13,7 +13,7 @@ class NoteViewModel: ObservableObject {
     @Published var notes: [Note] = []
     @Published var deleteItem: Note?
 
-    // MARK: - Methods
+    // MARK: - Methods (CRUD)
 
     /// Fetching all notes from server
     func fetchNotes() {
@@ -108,5 +108,49 @@ class NoteViewModel: ObservableObject {
         
         task.resume()
     }// postNote
+    
+    /// Update a existing note
+    func updateNote(text: String, noteId: String) {
+        let params = ["note": text] as [String: Any]
+        let url = URL(string: "http://localhost:3000/notes/\(noteId)")!
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
+        }
+        catch let error {
+            print("Error Serializing JSON: \(error)")
+            return
+        }
+        
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, res, err in
+            guard let self = self else { return }
+            guard err == nil else {
+                print("Error request: \(err!.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else { return }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] {
+                    print("Response from server: \(json)")
+                    DispatchQueue.main.async {
+                        self.fetchNotes() // Update the list of notes after adding a new one
+                    }
+                }
+            }
+            catch let error {
+                print("Error response parsing: \(error)")
+            }
+        }
+        
+        task.resume()
+    }// updateNote
 }
 
